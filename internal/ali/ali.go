@@ -1,62 +1,43 @@
 package ali
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
-type OSSType int
+func NewAliOSS(endpoint, accessId, accessKey string) *AliOSS {
 
-type STSProvider interface {
-	GenSTS(name string) string
-}
-
-type OSS struct {
-	Id string
-
-	Provider    OSSType
-	Endpoint    string
-	AccessKey   string
-	AccessId    string
-	BucketNames []string
-}
-
-type Object struct {
-	OSSId string
-	Name  string
-}
-
-func ali() {
-	bucketName := "yourBucketName"
-	// yourObjectName填写Object完整路径，完整路径中不能包含Bucket名称
-	objectName := "exampledir/exampleobject.txt"
-
-	// 从环境变量中获取访问凭证。运行本代码示例之前，请确保已设置环境变量OSS_ACCESS_KEY_ID和OSS_ACCESS_KEY_SECRET。
-	provider, err := oss.NewEnvironmentVariableCredentialsProvider()
+	c, err := oss.New(endpoint, accessId, accessKey)
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(-1)
+		return nil
 	}
 
-	// 创建OSSClient实例。
-	// yourEndpoint填写Bucket对应的Endpoint，以华东1（杭州）为例，填写为https://oss-cn-hangzhou.aliyuncs.com。其它Region请按实际情况填写。
-	client, err := oss.New("yourEndpoint", "", "", oss.SetCredentialsProvider(&provider))
+	return &AliOSS{
+		endpoint:  endpoint,
+		accessId:  accessId,
+		accessKey: accessKey,
+		client:    c,
+	}
+}
+
+type AliOSS struct {
+	endpoint  string
+	accessId  string
+	accessKey string
+	client    *oss.Client
+}
+
+func (o *AliOSS) GenSTS(bucketName, objectName string) (string, error) {
+	bucket, err := o.client.Bucket(bucketName)
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(-1)
+		return "", err
 	}
 
-	// 获取存储空间。
-	bucket, err := client.Bucket(bucketName)
+	// options can used for set ACL(not tested)
+	// should also set callback by options
+	signedURL, err := bucket.SignURL(objectName, oss.HTTPPut, 10)
 	if err != nil {
+		return "", err
 	}
 
-	// upload uri
-	su, err := bucket.SignURL(objectName, oss.HTTPPut, 10)
-
-	// download uri
-	su, err = bucket.SignURL(objectName, oss.HTTPGet, 10)
-
+	return signedURL, nil
 }
