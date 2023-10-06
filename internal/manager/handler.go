@@ -32,12 +32,13 @@ func (h *Handlers) CreateHandler(c *gin.Context) {
 	}
 
 	p := &OSSProvider{
-		Name:      param.Name,
-		Oid:       param.Oid,
-		Type:      param.Type,
-		Endpoint:  param.Endpoint,
-		AccessId:  param.AccessId,
-		AccessKey: param.AccessKey,
+		Name:       param.Name,
+		Oid:        param.Oid,
+		Type:       param.Type,
+		Endpoint:   param.Endpoint,
+		AccessId:   param.AccessId,
+		AccessKey:  param.AccessKey,
+		BucketName: param.BucketName,
 	}
 
 	err := h.m.Create(p)
@@ -53,7 +54,6 @@ func (h *Handlers) STSHandler(c *gin.Context) {
 
 	param := &struct {
 		Id         string `json:"id"`
-		BucketName string `json:"bucket"`
 		ObjectName string `json:"obj"`
 	}{}
 	if err := c.BindJSON(&param); err != nil {
@@ -61,7 +61,7 @@ func (h *Handlers) STSHandler(c *gin.Context) {
 		return
 	}
 
-	sts, err := h.m.GenSTS(param.Id, param.BucketName, param.ObjectName)
+	sts, err := h.m.GenSTS(param.Id, param.ObjectName)
 	if err != nil {
 		c.JSON(200, httpx.NewResponse(1).WithData(fmt.Sprintf("STS gen err %s", err)))
 		return

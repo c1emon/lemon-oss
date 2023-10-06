@@ -9,9 +9,13 @@ import (
 )
 
 func NewManager() *Manager {
+	providerRepo := &gormOSSProviderRepository{gormx.GetGormDB()}
+	providerRepo.InitDB()
+	objRepo := &gormOSSObjectRepository{gormx.GetGormDB()}
+	objRepo.InitDB()
 	return &Manager{
-		providerRepo: &gormOSSProviderRepository{gormx.GetGormDB()},
-		objRepo:      &gormOSSObjectRepository{gormx.GetGormDB()},
+		providerRepo: providerRepo,
+		objRepo:      objRepo,
 	}
 }
 
@@ -28,7 +32,7 @@ func (m *Manager) Find(id string) (*OSSProvider, error) {
 	return m.providerRepo.GetOneById(context.Background(), id)
 }
 
-func (m *Manager) GenSTS(id, bucketName, objectName string) (string, error) {
+func (m *Manager) GenSTS(id, objectName string) (string, error) {
 	p, err := m.Find(id)
 	if err != nil {
 		return "", err
@@ -39,7 +43,7 @@ func (m *Manager) GenSTS(id, bucketName, objectName string) (string, error) {
 		return "", fmt.Errorf("unimplment oss provider type")
 	case Ali:
 		aliOSS := ali.NewAliOSS(p.Endpoint, p.AccessId, p.AccessKey)
-		return aliOSS.GenSTS(bucketName, objectName)
+		return aliOSS.GenSTS(p.BucketName, objectName)
 	default:
 		return "", fmt.Errorf("no such oss provider type")
 	}

@@ -34,7 +34,7 @@ func (o *AliOSS) GenSTS(bucketName, objectName string) (string, error) {
 
 	// options can used for set ACL(not tested)
 	// should also set callback by options
-	signedURL, err := bucket.SignURL(objectName, oss.HTTPPut, 10)
+	signedURL, err := bucket.SignURL(objectName, oss.HTTPPut, 600)
 	if err != nil {
 		return "", err
 	}
