@@ -15,11 +15,16 @@ import (
 var once = sync.Once{}
 var loggerInstance *logrus.Logger
 
-func GetLogger() *logrus.Logger {
+func GetLoggerInstance() *logrus.Logger {
 	once.Do(func() {
 		loggerInstance = logrus.New()
 	})
 	return loggerInstance
+}
+
+func GetLogger() *logrus.Logger {
+	// return GetLoggerInstance().WithField("", "").Logger
+	return GetLoggerInstance()
 }
 
 var cstZone = time.FixedZone("GMT", 8*3600)

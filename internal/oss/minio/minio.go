@@ -4,36 +4,60 @@ import (
 	"context"
 	"time"
 
+	"github.com/c1emon/lemon_oss/internal/manager/store"
+	"github.com/c1emon/lemon_oss/pkg/logx"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/sirupsen/logrus"
 )
 
 const (
 	defaultExpiryTime = time.Second * 24 * 60 * 60 // 1 day
 
-	endpoint        string = "oss.app.clemon.icu:883"
-	accessKeyID     string = "R9CwsV40bAL8K2fc"
-	secretAccessKey string = "xJyGZToa4qWNZU4NgG79m5DUjELc6URe"
-	useSSL          bool   = true
+	// endpoint        string = "oss.app.clemon.icu:883"
+	// accessKeyID     string = "R9CwsV40bAL8K2fc"
+	// secretAccessKey string = "xJyGZToa4qWNZU4NgG79m5DUjELc6URe"
+	// useSSL          bool   = true
 )
 
 type Client struct {
 	client *minio.Core
+	logger *logrus.Logger
 }
 
-func NewMinioClient() *Client {
+func NewMinioClient(endpoint, accessKeyID, secretAccessKey string, useSSL bool) (*Client, error) {
 	client, err := minio.NewCore(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
 		Secure: useSSL,
 	})
 	if err != nil {
-		panic(err)
-		// log.Fatalln(err)
+		return nil, err
 	}
 
 	return &Client{
+		logger: logx.GetLogger(),
 		client: client,
+	}, nil
+}
+
+func (c *Client) InitUpload(bucketName, objName string) *store.UploadReq {
+	return &store.UploadReq{
+		BucketName: bucketName,
+		ObjName:    objName,
 	}
+}
+
+func (c *Client) GetUploadStatus(id string) *store.UploadReq {
+
+	return nil
+}
+
+func (c *Client) CompleteUpload(id string) {
+
+}
+
+func (c *Client) GetPersignedUri(id string) string {
+
 }
 
 func (c *Client) Mulit() {

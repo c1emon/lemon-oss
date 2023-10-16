@@ -6,13 +6,10 @@ type OSSType int
 
 const (
 	S3 OSSType = iota
+	Minio
 	Ali
 	COS
 )
-
-type STSProvider interface {
-	GenSTS(name string) string
-}
 
 type OSSProvider struct {
 	gormx.BaseFields
@@ -48,4 +45,14 @@ func (OSSObject) TableName() string {
 
 type OSSObjectRepository interface {
 	gormx.BaseRepository[OSSObject]
+}
+
+type UploadReq struct {
+	Id         string
+	ProviderId string
+	BucketName string
+	ObjName    string
+
+	Mulitpart bool
+	Done      bool
 }
