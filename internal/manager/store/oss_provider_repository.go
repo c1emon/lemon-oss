@@ -1,4 +1,4 @@
-package manager
+package store
 
 import (
 	"context"
@@ -9,25 +9,31 @@ import (
 	"gorm.io/gorm"
 )
 
-var _ OSSProviderRepository = &gormOSSProviderRepository{}
+var _ OSSProviderRepository = &GormOSSProviderRepository{}
 
-type gormOSSProviderRepository struct {
+func NewGormOSSProviderRepository(db *gorm.DB) *GormOSSProviderRepository {
+	r := &GormOSSProviderRepository{db: db}
+	r.InitDB()
+	return r
+}
+
+type GormOSSProviderRepository struct {
 	db *gorm.DB
 }
 
 // CreateOne implements OSSProviderRepository.
-func (r *gormOSSProviderRepository) CreateOne(ctx context.Context, provider *OSSProvider) error {
+func (r *GormOSSProviderRepository) CreateOne(ctx context.Context, provider *OSSProvider) error {
 	err := r.db.WithContext(ctx).Create(provider).Error
 	return errors.Wrap(errorx.From(err), fmt.Sprintf("provider %s", provider.Name))
 }
 
 // DeleteOneById implements OSSProviderRepository.
-func (r *gormOSSProviderRepository) DeleteOneById(context.Context, string) error {
+func (r *GormOSSProviderRepository) DeleteOneById(context.Context, string) error {
 	panic("unimplemented")
 }
 
 // GetOneById implements OSSProviderRepository.
-func (r *gormOSSProviderRepository) GetOneById(ctx context.Context, id string) (*OSSProvider, error) {
+func (r *GormOSSProviderRepository) GetOneById(ctx context.Context, id string) (*OSSProvider, error) {
 	provider := &OSSProvider{}
 	provider.Id = id
 	res := r.db.WithContext(ctx).First(provider)
@@ -35,11 +41,11 @@ func (r *gormOSSProviderRepository) GetOneById(ctx context.Context, id string) (
 }
 
 // InitDB implements OSSProviderRepository.
-func (r *gormOSSProviderRepository) InitDB() error {
+func (r *GormOSSProviderRepository) InitDB() error {
 	return r.db.AutoMigrate(&OSSProvider{})
 }
 
 // UpdateOneById implements OSSProviderRepository.
-func (r *gormOSSProviderRepository) UpdateOneById(context.Context, string, *OSSProvider) error {
+func (r *GormOSSProviderRepository) UpdateOneById(context.Context, string, *OSSProvider) error {
 	panic("unimplemented")
 }

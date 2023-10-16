@@ -4,15 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/c1emon/lemon_oss/internal/ali"
+	"github.com/c1emon/lemon_oss/internal/manager/store"
+	"github.com/c1emon/lemon_oss/internal/oss/ali"
 	"github.com/c1emon/lemon_oss/pkg/gormx"
 )
 
 func NewManager() *Manager {
-	providerRepo := &gormOSSProviderRepository{gormx.GetGormDB()}
-	providerRepo.InitDB()
-	objRepo := &gormOSSObjectRepository{gormx.GetGormDB()}
-	objRepo.InitDB()
+	providerRepo := store.NewGormOSSProviderRepository(gormx.GetGormDB())
+	objRepo := store.NewGormOSSObjectRepository(gormx.GetGormDB())
+
 	return &Manager{
 		providerRepo: providerRepo,
 		objRepo:      objRepo,
@@ -20,15 +20,15 @@ func NewManager() *Manager {
 }
 
 type Manager struct {
-	providerRepo OSSProviderRepository
-	objRepo      OSSObjectRepository
+	providerRepo store.OSSProviderRepository
+	objRepo      store.OSSObjectRepository
 }
 
-func (m *Manager) Create(p *OSSProvider) error {
+func (m *Manager) Create(p *store.OSSProvider) error {
 	return m.providerRepo.CreateOne(context.Background(), p)
 }
 
-func (m *Manager) Find(id string) (*OSSProvider, error) {
+func (m *Manager) Find(id string) (*store.OSSProvider, error) {
 	return m.providerRepo.GetOneById(context.Background(), id)
 }
 
@@ -39,9 +39,9 @@ func (m *Manager) GenSTS(id, objectName string) (string, error) {
 	}
 
 	switch p.Type {
-	case S3:
+	case store.S3:
 		return "", fmt.Errorf("unimplment oss provider type")
-	case Ali:
+	case store.Ali:
 		aliOSS := ali.NewAliOSS(p.Endpoint, p.AccessId, p.AccessKey)
 		return aliOSS.GenSTS(p.BucketName, objectName)
 	default:

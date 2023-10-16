@@ -3,6 +3,7 @@ package manager
 import (
 	"fmt"
 
+	"github.com/c1emon/lemon_oss/internal/manager/store"
 	"github.com/c1emon/lemon_oss/pkg/httpx"
 	"github.com/gin-gonic/gin"
 )
@@ -20,18 +21,18 @@ func (h *Handlers) CreateHandler(c *gin.Context) {
 		Name string `json:"name"`
 		Oid  string `json:"oid"`
 
-		Type       OSSType `json:"type"`
-		Endpoint   string  `json:"endpoint"`
-		AccessKey  string  `json:"access_key"`
-		AccessId   string  `json:"access_id"`
-		BucketName string  `json:"bucket_name"`
+		Type       store.OSSType `json:"type"`
+		Endpoint   string        `json:"endpoint"`
+		AccessKey  string        `json:"access_key"`
+		AccessId   string        `json:"access_id"`
+		BucketName string        `json:"bucket_name"`
 	}{}
 	if err := c.BindJSON(&param); err != nil {
 		c.JSON(200, httpx.NewResponse(1).WithData("json parse err"))
 		return
 	}
 
-	p := &OSSProvider{
+	p := &store.OSSProvider{
 		Name:       param.Name,
 		Oid:        param.Oid,
 		Type:       param.Type,
