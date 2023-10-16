@@ -1,6 +1,6 @@
 package store
 
-import "github.com/c1emon/lemon_oss/pkg/gormx"
+import "github.com/c1emon/gcommon/gormx"
 
 type OSSType int
 

@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/c1emon/gcommon/ginx"
+	"github.com/c1emon/gcommon/logx"
 	"github.com/c1emon/lemon_oss/internal/setting"
-	"github.com/c1emon/lemon_oss/pkg/ginx"
-	"github.com/c1emon/lemon_oss/pkg/logx"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )

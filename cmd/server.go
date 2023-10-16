@@ -11,10 +11,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/c1emon/gcommon/gormx"
+	"github.com/c1emon/gcommon/logx"
 	"github.com/c1emon/lemon_oss/internal/server"
 	"github.com/c1emon/lemon_oss/internal/setting"
-	"github.com/c1emon/lemon_oss/pkg/gormx"
-	"github.com/c1emon/lemon_oss/pkg/logx"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

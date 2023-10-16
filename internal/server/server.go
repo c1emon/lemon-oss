@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/c1emon/gcommon/logx"
 	"github.com/c1emon/lemon_oss/internal/setting"
-	"github.com/c1emon/lemon_oss/pkg/logx"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 )

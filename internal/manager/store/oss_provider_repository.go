@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/c1emon/lemon_oss/pkg/errorx"
+	"github.com/c1emon/gcommon/errorx"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )

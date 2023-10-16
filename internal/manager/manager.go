@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/c1emon/gcommon/gormx"
 	"github.com/c1emon/lemon_oss/internal/manager/store"
 	"github.com/c1emon/lemon_oss/internal/oss/ali"
-	"github.com/c1emon/lemon_oss/pkg/gormx"
 )
 
 func NewManager() *Manager {

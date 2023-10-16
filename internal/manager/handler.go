@@ -3,8 +3,8 @@ package manager
 import (
 	"fmt"
 
+	"github.com/c1emon/gcommon/httpx"
 	"github.com/c1emon/lemon_oss/internal/manager/store"
-	"github.com/c1emon/lemon_oss/pkg/httpx"
 	"github.com/gin-gonic/gin"
 )
 

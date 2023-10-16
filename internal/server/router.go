@@ -1,8 +1,8 @@
 package server
 
 import (
+	"github.com/c1emon/gcommon/ginx"
 	"github.com/c1emon/lemon_oss/internal/manager"
-	"github.com/c1emon/lemon_oss/pkg/ginx"
 )
 
 func RegRouter() {
