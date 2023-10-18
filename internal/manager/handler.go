@@ -93,7 +93,7 @@ func (h *Handlers) UploadHandler(c *gin.Context) {
 		c.JSON(200, httpx.NewResponse(1).WithData(fmt.Sprintf("read form file error: %s", err)))
 		return
 	}
-	f.Close()
+	defer f.Close()
 
 	err = h.m.Upload(reqId, param.Object, f, file.Size)
 	if err != nil {

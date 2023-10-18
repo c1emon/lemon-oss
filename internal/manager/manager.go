@@ -36,7 +36,7 @@ func (m *Manager) InitUpload(providerId string, mulitpart bool) string {
 		ProviderId: providerId,
 		Mulitpart:  mulitpart,
 		Done:       false,
-		ObjectIds:  make([]string, 1),
+		ObjectIds:  make([]string, 0),
 	}
 	m.cacher.Set(req.Id, req)
 
@@ -58,7 +58,7 @@ func (m *Manager) Upload(reqId string, object string, data io.Reader, size int64
 	case store.S3:
 		return fmt.Errorf("bad oss provider id %s", req.ProviderId)
 	case store.Minio:
-		client, err = minio.NewMinioClient(provider.Endpoint, provider.AccessId, provider.AccessKey, false)
+		client, err = minio.NewMinioClient(provider.Endpoint, provider.AccessId, provider.AccessKey, provider.Tls)
 	case store.Ali:
 		return fmt.Errorf("bad oss provider id %s", req.ProviderId)
 	case store.COS:
