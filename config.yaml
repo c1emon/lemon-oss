@@ -1,0 +1,8 @@
+log: debug
+
+server:
+  port: 8081
+
+db:
+  driver: postgres
+  source: host=10.10.0.70 port=5432 user=postgres dbname=lemon_oss password=123456

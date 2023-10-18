@@ -6,17 +6,17 @@ var cfgInstance *Config
 var cfgOnce = sync.Once{}
 
 type Config struct {
-	File  string
-	LogLv string
-	Http  HttpCfg
-	DB    DBCfg
+	File       string
+	LogLv      string        `mapstructure:"log"`
+	HttpServer HttpServerCfg `mapstructure:"server"`
+	DB         DBCfg         `mapstructure:"db"`
 }
 
 func GetCfg() *Config {
 	cfgOnce.Do(func() {
 		cfgInstance = &Config{
-			Http: HttpCfg{},
-			DB:   DBCfg{},
+			HttpServer: HttpServerCfg{},
+			DB:         DBCfg{},
 		}
 	})
 	return cfgInstance

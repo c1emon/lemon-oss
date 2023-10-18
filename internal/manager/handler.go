@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/c1emon/gcommon/httpx"
 	"github.com/c1emon/lemon_oss/internal/manager/store"
@@ -22,6 +23,7 @@ func (h *Handlers) CreateHandler(c *gin.Context) {
 		Oid  string `json:"oid"`
 
 		Type       store.OSSType `json:"type"`
+		Tls        bool          `json:"tls"`
 		Endpoint   string        `json:"endpoint"`
 		AccessKey  string        `json:"access_key"`
 		AccessId   string        `json:"access_id"`
@@ -36,6 +38,7 @@ func (h *Handlers) CreateHandler(c *gin.Context) {
 		Name:       param.Name,
 		Oid:        param.Oid,
 		Type:       param.Type,
+		Tls:        param.Tls,
 		Endpoint:   param.Endpoint,
 		AccessId:   param.AccessId,
 		AccessKey:  param.AccessKey,
@@ -51,26 +54,64 @@ func (h *Handlers) CreateHandler(c *gin.Context) {
 	c.JSON(200, httpx.ResponseOK().WithData(p))
 }
 
-func (h *Handlers) STSHandler(c *gin.Context) {
+func (h *Handlers) InitUploadhandler(c *gin.Context) {
+	providerId := c.Param("provider_id")
+	mulitPart, err := strconv.Atoi(c.Query("mulit_part"))
+	if err != nil {
+		c.JSON(200, httpx.NewResponse(200).WithData(fmt.Sprintf("mulit_part invaild: %s", err)))
+		return
+	}
+
+	id := h.m.InitUpload(providerId, mulitPart > 1)
+
+	ret := &struct {
+		Id string `json:"id"`
+	}{Id: id}
+	c.JSON(200, httpx.ResponseOK().WithData(ret))
+}
+
+func (h *Handlers) UploadHandler(c *gin.Context) {
+	reqId := c.Param("req_id")
 
 	param := &struct {
-		Id         string `json:"id"`
-		ObjectName string `json:"obj"`
+		Object string `form:"object"`
+		Name   string `form:"name"`
 	}{}
-	if err := c.BindJSON(&param); err != nil {
-		c.JSON(200, httpx.NewResponse(1).WithData("json parse err"))
+	if err := c.ShouldBind(&param); err != nil {
+		c.JSON(200, httpx.NewResponse(1).WithData(fmt.Sprintf("param parse error: %s", err)))
 		return
 	}
 
-	sts, err := h.m.GenSTS(param.Id, param.ObjectName)
+	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(200, httpx.NewResponse(1).WithData(fmt.Sprintf("STS gen err %s", err)))
+		c.JSON(200, httpx.NewResponse(1).WithData(fmt.Sprintf("retrive form file error: %s", err)))
 		return
 	}
 
-	resp := &struct {
-		STS string `json:"sts"`
-	}{sts}
+	f, err := file.Open()
+	if err != nil {
+		c.JSON(200, httpx.NewResponse(1).WithData(fmt.Sprintf("read form file error: %s", err)))
+		return
+	}
+	f.Close()
 
-	c.JSON(200, httpx.ResponseOK().WithData(resp))
+	err = h.m.Upload(reqId, param.Object, f, file.Size)
+	if err != nil {
+		c.JSON(200, httpx.NewResponse(1).WithData(fmt.Sprintf("upload file error: %s", err)))
+		return
+	}
+
+	c.JSON(200, httpx.ResponseOK())
+}
+
+func (h *Handlers) CompleteUploadHandler(c *gin.Context) {
+	reqId := c.Param("req_id")
+
+	req, err := h.m.CompleteUpload(reqId)
+	if err != nil {
+		c.JSON(200, httpx.NewResponse(1).WithData(fmt.Sprintf("complete upload error: %s", err)))
+		return
+	}
+
+	c.JSON(200, httpx.ResponseOK().WithData(req))
 }

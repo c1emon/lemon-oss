@@ -10,5 +10,7 @@ func RegRouter() {
 	eng := ginx.GetGinEng()
 	g1 := eng.Group("/api/v1/oss")
 	g1.POST("/provider", h.CreateHandler)
-	g1.POST("/sts", h.STSHandler)
+	g1.GET("/:provider_id/upload", h.InitUploadhandler)
+	g1.POST("/upload/:req_id", h.UploadHandler)
+	g1.PUT("/upload/:req_id", h.CompleteUploadHandler)
 }

@@ -1,19 +1,11 @@
 package oss
 
-import "github.com/c1emon/lemon_oss/internal/manager/store"
+import (
+	"context"
+	"io"
+)
 
-type Upload interface {
-	InitUpload(string, string) *store.UploadReq
-	GetUploadStatus(string)
-	CompleteUpload(string)
-}
-
-type SingleUpload interface {
-	Upload
-	GetPersignedUri() string
-}
-
-type MulitpartUpload interface {
-	Upload
-	GetPersignedUris() string
+type ObjectStorage interface {
+	Upload(ctx context.Context, bucket, object string, data io.Reader, size int64) error
+	Download(ctx context.Context, bucket, object string) (io.Reader, error)
 }

@@ -18,7 +18,7 @@ import (
 func ProvideHttpServer(cfg *setting.Config) (*HttpServer, error) {
 	return &HttpServer{
 		server: ginx.GetGinEng(),
-		port:   cfg.Http.Port,
+		port:   cfg.HttpServer.Port,
 		log:    logx.GetLogger(),
 	}, nil
 }

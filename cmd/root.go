@@ -25,10 +25,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/c1emon/gcommon/logx"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/c1emon/gcommon/logx"
 	"github.com/c1emon/lemon_oss/internal/setting"
 )
 
@@ -69,8 +69,10 @@ func init() {
 
 	cfg := setting.GetCfg()
 	rootCmd.PersistentFlags().StringVar(&cfg.File, "config", "", "config file (default is $HOME/.lemon_oss.yaml)")
-	rootCmd.PersistentFlags().StringVar(&cfg.LogLv, "log", "info", "log level")
+
+	rootCmd.PersistentFlags().String("log", "info", "log level")
 	viper.BindPFlag("log", rootCmd.PersistentFlags().Lookup("log"))
+	// viper.SetDefault("log", rootCmd.PersistentFlags().Lookup("log").DefValue)
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -81,13 +83,16 @@ func initConfig() {
 		viper.SetConfigFile(cfg.File)
 	} else {
 		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
+		// home, err := os.UserHomeDir()
+		// cobra.CheckErr(err)
 
 		// Search config in home directory with name ".lemon_oss" (without extension).
-		viper.AddConfigPath(home)
+		viper.AddConfigPath("/etc/lemon_oss")
+		viper.AddConfigPath(".")
+		// viper.AddConfigPath(home)
+
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".lemon_oss")
+		viper.SetConfigName("config")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -95,5 +100,6 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		viper.Unmarshal(cfg)
 	}
 }

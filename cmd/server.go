@@ -72,13 +72,12 @@ to quickly create a Cobra application.`,
 func init() {
 	rootCmd.AddCommand(serverCmd)
 
-	cfg := setting.GetCfg()
-	serverCmd.PersistentFlags().IntVarP(&cfg.Http.Port, "port", "p", 8080, "server port")
-	viper.BindPFlag("port", serverCmd.PersistentFlags().Lookup("port"))
+	serverCmd.PersistentFlags().IntP("port", "p", 8080, "server port")
+	viper.BindPFlag("server.port", serverCmd.PersistentFlags().Lookup("port"))
 
-	serverCmd.PersistentFlags().StringVar(&cfg.DB.Driver, "driver", "postgres", "db driver name")
-	viper.BindPFlag("driver", serverCmd.PersistentFlags().Lookup("driver"))
+	serverCmd.PersistentFlags().String("driver", "postgres", "db driver name")
+	viper.BindPFlag("db.driver", serverCmd.PersistentFlags().Lookup("driver"))
 
-	serverCmd.PersistentFlags().StringVar(&cfg.DB.Source, "source", "host=10.10.0.70 port=5432 user=postgres dbname=lemon_oss password=123456", "db source")
-	viper.BindPFlag("source", serverCmd.PersistentFlags().Lookup("source"))
+	serverCmd.PersistentFlags().String("source", "host=localhost port=5432 user=postgres dbname=lemon_oss password=123456", "db source")
+	viper.BindPFlag("db.source", serverCmd.PersistentFlags().Lookup("source"))
 }

@@ -1,6 +1,6 @@
 package setting
 
 type DBCfg struct {
-	Driver string
-	Source string
+	Driver string `mapstructure:"driver"`
+	Source string `mapstructure:"source"`
 }

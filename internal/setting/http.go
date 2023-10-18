@@ -1,5 +1,5 @@
 package setting
 
-type HttpCfg struct {
-	Port int
+type HttpServerCfg struct {
+	Port int `mapstructure:"port"`
 }
