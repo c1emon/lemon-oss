@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"reflect"
 	"sync"
 	"syscall"
 	"time"
@@ -16,14 +17,13 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func Initialize(cfg *setting.Config) (*Server, error) {
-	srv, _ := ProvideHttpServer(cfg)
-	return New(cfg, srv)
+type BackgroundService interface {
+	Run(ctx context.Context) error
 }
 
 // from https://github.com/grafana/grafana/blob/4cc72a22ad03132295ab3428ed9877ba2cb42eb2/pkg/server/server.go
-func New(cfg *setting.Config, httpSrv *HttpServer) (*Server, error) {
-	s, err := newServer(cfg, httpSrv)
+func New(cfg *setting.Config) (*Server, error) {
+	s, err := newServer(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -35,18 +35,18 @@ func New(cfg *setting.Config, httpSrv *HttpServer) (*Server, error) {
 	return s, nil
 }
 
-func newServer(cfg *setting.Config, httpSrv *HttpServer) (*Server, error) {
+func newServer(cfg *setting.Config) (*Server, error) {
 	rootCtx, shutdownFn := context.WithCancel(context.Background())
 	childRoutines, childCtx := errgroup.WithContext(rootCtx)
 
 	s := &Server{
-		context:          childCtx,
-		childRoutines:    childRoutines,
-		shutdownFn:       shutdownFn,
-		shutdownFinished: make(chan any),
-		log:              logx.GetLogger(),
-		cfg:              cfg,
-		httpSrv:          httpSrv,
+		context:            childCtx,
+		childRoutines:      childRoutines,
+		shutdownFn:         shutdownFn,
+		shutdownFinished:   make(chan any),
+		log:                logx.GetLogger(),
+		cfg:                cfg,
+		backgroundServices: make([]BackgroundService, 0),
 	}
 
 	return s, nil
@@ -68,9 +68,11 @@ type Server struct {
 	// commit      string
 	// buildBranch string
 
-	httpSrv *HttpServer
+	backgroundServices []BackgroundService
+}
 
-	// backgroundServices []registry.BackgroundService
+func (s *Server) RegistSvc(svc BackgroundService) {
+	s.backgroundServices = append(s.backgroundServices, svc)
 }
 
 func (s *Server) Init() error {
@@ -92,27 +94,35 @@ func (s *Server) Run() error {
 		return err
 	}
 
-	s.childRoutines.Go(func() error {
-		select {
-		case <-s.context.Done():
-			return s.context.Err()
-		default:
-		}
+	services := s.backgroundServices
+	// Start background services.
+	for _, svc := range services {
 
-		// start service
-		s.log.Debugf("Starting background service: %s", "http server")
-		err := s.httpSrv.Run(s.context)
-		// Do not return context.Canceled error since errgroup.Group only
-		// returns the first error to the caller - thus we can miss a more
-		// interesting error.
-		if err != nil && !errors.Is(err, context.Canceled) {
-			s.log.Errorf("Stopped background service: %s for %s", "http server", err)
-			return fmt.Errorf("%s run error: %w", "http server", err)
-		}
-		s.log.Debugf("Stopped background service %s for %s", "http server", err)
-		return nil
+		service := svc
+		svcName := reflect.TypeOf(service).String()
 
-	})
+		s.childRoutines.Go(func() error {
+			select {
+			case <-s.context.Done():
+				return s.context.Err()
+			default:
+			}
+
+			// start service
+			s.log.Debugf("Starting background service: %s", svcName)
+			err := service.Run(s.context)
+			// Do not return context.Canceled error since errgroup.Group only
+			// returns the first error to the caller - thus we can miss a more
+			// interesting error.
+			if err != nil && !errors.Is(err, context.Canceled) {
+				s.log.Errorf("Stopped background service: %s for %s", "http server", err)
+				return fmt.Errorf("%s run error: %w", "http server", err)
+			}
+			s.log.Debugf("Stopped background service %s for %s", svcName, err)
+			return nil
+		})
+
+	}
 
 	return s.childRoutines.Wait()
 }

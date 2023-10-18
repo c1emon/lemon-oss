@@ -1,4 +1,4 @@
-package server
+package service
 
 import (
 	"context"
@@ -15,21 +15,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func ProvideHttpServer(cfg *setting.Config) (*HttpServer, error) {
-	return &HttpServer{
+func ProvideHttpService(cfg *setting.Config) (*HttpService, error) {
+	return &HttpService{
 		server: ginx.GetGinEng(),
 		port:   cfg.HttpServer.Port,
 		log:    logx.GetLogger(),
 	}, nil
 }
 
-type HttpServer struct {
+type HttpService struct {
 	log    *logrus.Logger
 	server *gin.Engine
 	port   int
 }
 
-func (s *HttpServer) Run(ctx context.Context) error {
+func (s *HttpService) Run(ctx context.Context) error {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
