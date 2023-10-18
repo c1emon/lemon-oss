@@ -4,7 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
+	"time"
 
 	"github.com/c1emon/gcommon/logx"
 	"github.com/c1emon/lemon_oss/internal/setting"
@@ -133,4 +137,28 @@ func (s *Server) Shutdown(ctx context.Context, reason string) error {
 	})
 
 	return err
+}
+
+func (s *Server) ListenToSystemSignals(ctx context.Context) {
+	signalChan := make(chan os.Signal, 1)
+	sighupChan := make(chan os.Signal, 1)
+
+	signal.Notify(sighupChan, syscall.SIGHUP)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+
+	for {
+		select {
+		case <-sighupChan:
+			// if err := log.Reload(); err != nil {
+			// 	fmt.Fprintf(os.Stderr, "Failed to reload loggers: %s\n", err)
+			// }
+		case sig := <-signalChan:
+			ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+			defer cancel()
+			if err := s.Shutdown(ctx, fmt.Sprintf("System signal: %s", sig)); err != nil {
+				fmt.Fprintf(os.Stderr, "Timed out waiting for server to shut down\n")
+			}
+			return
+		}
+	}
 }

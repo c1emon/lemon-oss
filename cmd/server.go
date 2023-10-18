@@ -5,11 +5,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"github.com/c1emon/gcommon/gormx"
 	"github.com/c1emon/gcommon/logx"
@@ -18,30 +13,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-func listenToSystemSignals(ctx context.Context, s *server.Server) {
-	signalChan := make(chan os.Signal, 1)
-	sighupChan := make(chan os.Signal, 1)
-
-	signal.Notify(sighupChan, syscall.SIGHUP)
-	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
-
-	for {
-		select {
-		case <-sighupChan:
-			// if err := log.Reload(); err != nil {
-			// 	fmt.Fprintf(os.Stderr, "Failed to reload loggers: %s\n", err)
-			// }
-		case sig := <-signalChan:
-			ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
-			defer cancel()
-			if err := s.Shutdown(ctx, fmt.Sprintf("System signal: %s", sig)); err != nil {
-				fmt.Fprintf(os.Stderr, "Timed out waiting for server to shut down\n")
-			}
-			return
-		}
-	}
-}
 
 // serverCmd represents the server command
 var serverCmd = &cobra.Command{
@@ -64,7 +35,7 @@ to quickly create a Cobra application.`,
 
 		gormx.Initialize(cfg.DB.Driver, cfg.DB.Source)
 		s, _ := server.Initialize(cfg)
-		go listenToSystemSignals(context.Background(), s)
+		go s.ListenToSystemSignals(context.Background())
 		s.Run()
 	},
 }
