@@ -8,9 +8,9 @@ import (
 
 	"github.com/c1emon/gcommon/gormx"
 	"github.com/c1emon/gcommon/logx"
+	"github.com/c1emon/gcommon/server"
 	"github.com/c1emon/lemon_oss/internal/service"
 	"github.com/c1emon/lemon_oss/internal/setting"
-	"github.com/c1emon/lemon_oss/pkg/server"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -35,7 +35,7 @@ to quickly create a Cobra application.`,
 		cfg := setting.GetCfg()
 
 		gormx.Initialize(cfg.DB.Driver, cfg.DB.Source)
-		s, _ := server.New(cfg)
+		s, _ := server.New()
 
 		httpSrv, _ := service.ProvideHttpService(cfg)
 		s.RegistSvc(httpSrv)

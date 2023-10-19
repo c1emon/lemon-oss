@@ -4,7 +4,7 @@ go 1.21.3
 
 require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.9+incompatible
-	github.com/c1emon/gcommon v1.0.0
+	github.com/c1emon/gcommon v1.1.0
 	github.com/minio/minio-go/v7 v7.0.63
 	github.com/sirupsen/logrus v1.9.3
 	gorm.io/gorm v1.25.5
@@ -64,7 +64,7 @@ require (
 	github.com/lucsky/cuid v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/pkg/errors v0.9.1
